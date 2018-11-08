@@ -9,7 +9,7 @@ class HTTPRequest:
     # connection specifies whether to keep the connection alive
     # cookies is a dict of any cookies to include in the request
     # body is the body message
-    def __init__(self, method, resource, host='fring.ccs.neu.edu', cookies='', body='', version='1.0'):
+    def __init__(self, method, resource, host='fring.ccs.neu.edu', cookies='', body='', version='1.1'):
         self.method = method.upper()
         self.resource = resource
         self.version = version
@@ -25,8 +25,8 @@ class HTTPRequest:
             f'Host: {self.host}\r\n'
             f'Connection: keep-alive\r\n'
             f'Content-Length: {self.content_length}\r\n'
-            f'Cookie: {self.cookies}\r\n'
-            f'{self.body}\r\n\r\n'
+            f'Cookie: {self.cookies}\r\n\r\n'
+            f'{self.body}'
             )
         return request
 
