@@ -9,7 +9,7 @@ class HTTPRequest:
     # connection specifies whether to keep the connection alive
     # cookies is a dict of any cookies to include in the request
     # body is the body message
-    def __init__(self, method, resource, host='fring.ccs.neu.edu', cookies='', body='', version='1.0'):
+    def __init__(self, method, resource, host='fring.ccs.neu.edu', cookies='', body='', version='1.1'):
         self.method = method.upper()
         self.resource = resource
         self.version = version
@@ -21,22 +21,15 @@ class HTTPRequest:
     # this request as a String
     def __str__(self):
         request = (
-            f'{self.method} {self.resource} HTTP/{self.version}\r\n'
-            f'Host: {self.host}\r\n'
-            f'Connection: keep-alive\r\n'
-            f'Content-Length: {self.content_length}\r\n'
-            f'Cookie: {self.cookies}\r\n\r\n'
-            f'{self.body}'
+            self.method+' '+ self.resource+' HTTP/' + self.version +'\r\n'
+            'Host: ' + self.host + '\r\n'
+            'Connection: keep-alive\r\n'
+            'Content-Type: application/x-www-form-urlencoded\r\n'
+            'Content-Length: '+ str(self.content_length) +'\r\n'
+            'Cookie: '+self.cookies+'\r\n\r\n' + self.body
             )
         return request
 
 
     def encode(self):
         return str(self).encode()
-
-# class FakebookHTTPRequest(HTTPRequest):
-#     def __init__(self, method, resource, cookies, body='', version='1.0'):
-#         super().__init__(method, resource, 'fring.ccs.neu.edu', cookies, body, version)
-
-# login_get = HTTPRequest('GET', '/accounts/login/?next=/fakebook', 'fring.ccs.neu.edu')
-# fakebook_login = FakebookHTTPRequest('GET', '/accounts/login/?next=/fakebook')
