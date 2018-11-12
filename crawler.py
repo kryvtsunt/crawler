@@ -1,17 +1,16 @@
-from request import *
+import time
+from parser import *
 from http import *
 from html.parser import HTMLParser
 
 
-def hasNumbers(inputString):
-    return any(char.isdigit() for char in inputString)
-
 class Crawler:
     def __init__(self, host='fring.ccs.neu.edu'):
-        self.http = HTTP(host)
-        self.links = []
+        self.parser = Parser()
+        self.host = host
 
     def login(self, username, password):
+        self.http = HTTP(self.host)
         get = HTTPRequest('GET', '/accounts/login/?next=/fakebook')
         response = self.http.send(get)
         print(str(get))
@@ -41,8 +40,7 @@ class Crawler:
         print(str(get))
         print('\r\n')
         print(response)
-
-
+        return response
 
 
     # retrieve cookies
@@ -77,56 +75,80 @@ class Crawler:
         location = response[set_start_index: set_end_index]
         return location
 
+    def retrieve_connection(self, response):
+        set_start_index = response.find('Connection', 0) + 12
+        set_end_index = response.find('\r\n', set_start_index)
+        connection = response[set_start_index: set_end_index]
+        return connection
+
+    def crawl(self):
+        response = self.login("001688440", "GBLTTC6G")
+        self.parser.feed(response)
+        while (len(self.parser.links) > 0):
+            print(self.parser.links)
+            print(self.parser.keys)
+            link = self.parser.links.pop()
+            while True:
+                resp = self.send(link)
+                status = resp[9:12]
+                print(status)
+                connection = self.retrieve_connection(resp)
+                print(connection)
+                if connection == "close":
+                    self.login("001688440", "GBLTTC6G")
+                    time.sleep(1)
+                elif status == "200":
+                    self.parser.feed(resp)
+                    break
+                elif status == "400" or status == "403" or status == "404":
+                    break
+                elif status == "500":
+                    self.login("001688440", "GBLTTC6G")
+                    time.sleep(1)
+
+    def crawl_page(self, href):
+        response = self.send(href)
+        self.parser.feed(response)
+        self.links += self.parser.links
+        print("page")
+        print(self.links)
+
+
+
+
+
 
     def __del__(self):
         self.http.__del__()
 
-# example from the python focumentation. needs refactoring
-class MyHTMLParser(HTMLParser):
 
+# example from the python documentation. needs refactoring
+class Parser(HTMLParser):
     def __init__(self):
         self.links = []
+        self.visited = []
+        self.flags = []
         super().__init__()
 
+
     def handle_starttag(self, tag, attrs):
-        print("Start tag:", tag)
         for attr in attrs:
-            if hasNumbers(str(attr)):
-                #set_start_index = attr.find('/fakebook/', 0)
-                #print(set_start_index)
-                #set_end_index = attr.find(")", set_start_index)
-                #href = attr[set_start_index: set_end_index]
+            if str(attr[0]) == 'href' and has_numbers(str(attr[1])) and attr[1] not in self.visited:
                 self.links.append(attr[1])
-            print("     attr:", attr)
+                self.visited.append(attr[1])
+            elif str(attr[0]) == 'h2':
+                self.flags.append(attr[1])
 
-    def handle_endtag(self, tag):
-        print("End tag  :", tag)
 
-    def handle_data(self, data):
-        print("Data     :", data)
 
-    def handle_comment(self, data):
-        print("Comment  :", data)
 
-    def handle_charref(self, name):
-        if name.startswith('x'):
-            c = chr(int(name[1:], 16))
-        else:
-            c = chr(int(name))
-        print("Num ent  :", c)
 
-    def handle_decl(self, data):
-        print("Decl     :", data)
-
+def has_numbers(inputString):
+    return any(char.isdigit() for char in inputString)
 
 
 crawler = Crawler()
-response = crawler.login("001688440", "GBLTTC6G")
-parser = MyHTMLParser()
-parser.feed(response)
-crawler.links += parser.links
-print(crawler.links)
-crawler.send(crawler.links[0])
+crawler.crawl()
 
 
 
