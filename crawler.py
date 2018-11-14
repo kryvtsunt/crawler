@@ -10,13 +10,11 @@ class Crawler:
         self.cookies = ""
         self.http = HTTP(self.host)
 
-
     def login(self, username, password):
-        response = self.send('/accounts/login/?next=/fakebook')
-        assert self.retrieve_cookies(response) == True
+        self.send('/accounts/login/?next=/fakebook')
+        # assert self.retrieve_cookies(response) == True
         body = "username=" + username + "&password=" + password + "&csrfmiddlewaretoken=" + self.csrf + "&next=%2Ffakebook%2F"
-        response = self.send('/accounts/login/?next=/fakebook', type='POST', body=body)
-        return response
+        self.send('/accounts/login/?next=/fakebook', type='POST', body=body)
 
     def send(self, href, type='GET', body=''):
         get = HTTPRequest(type, href, cookies=self.cookies, body=body)
@@ -34,31 +32,21 @@ class Crawler:
             print('\r\n')
             print('\r\n')
             if connection == "close":
-                self.http.s.close()
                 self.http = HTTP(self.host)
-                break
-            elif status == "200":
+            if status == "200":
+                self.retrieve_cookies(resp)
                 self.parser.feed(resp)
                 break
-            # elif status == "400" or status == "403" or status == "404":
-            #     break
-            elif status == "500":
-                self.http.s.close()
-                self.http = HTTP(self.host)
-
-            elif status == "302" or status == "301" or status== "300":
+            elif status == "302" or status == "301" or status == "300":
                 href = self.retrieve_location(resp)
                 self.retrieve_cookies(resp)
-                resp = self.send(href)
+                self.send(href)
                 break
+            elif status == "500":
+                continue
             else:
                 break
 
-        return resp
-
-
-
-    # retrieve cookies
     def retrieve_cookies(self, response):
         num_cookies = response.count('Set-Cookie')
         if (num_cookies == 0):
@@ -83,13 +71,11 @@ class Crawler:
         self.cookies = "csrftoken=" + self.csrf + "; sessionid=" + self.session
         return True
 
-
     def retrieve_location(self, response):
         set_start_index = response.find('Location', 0) + 10
         set_end_index = response.find('\r\n', set_start_index)
         location = response[set_start_index: set_end_index]
         return location
-
 
     def retrieve_connection(self, response):
         set_start_index = response.find('Connection', 0) + 12
@@ -97,11 +83,11 @@ class Crawler:
         connection = response[set_start_index: set_end_index]
         return connection
 
-
     def crawl(self, username, password):
-        response = self.login(username, password)
-        self.parser.feed(response)
-        while (len(self.parser.links) > 0):
+        self.login(username, password)
+        while len(self.parser.links) > 0:
+            if (len(self.parser.flags) == 5):
+                break
             print(self.parser.links)
             print(self.parser.flags)
             print(len(self.parser.links))
@@ -109,10 +95,10 @@ class Crawler:
             print('\r\n')
             link = self.parser.links.pop()
             self.send(link)
+        if (len(self.parser.flags) != 5):
+            self.parser.visited = []
+            self.crawl(username,password)
 
-
-    def __del__(self):
-        self.http.__del__()  # example from the python documentation. needs refactoring
 
 
 class Parser(HTMLParser):
@@ -129,8 +115,8 @@ class Parser(HTMLParser):
                 self.visited.append(str(attr[1]))
 
     def handle_data(self, data):
-        if 'FLAG: ' == data[ : 6]:
-            self.flags.append(data[ 6 : ])
+        if 'FLAG: ' == data[: 6]:
+            self.flags.append(data[6:])
 
 
 def has_numbers(inputString):
@@ -138,7 +124,6 @@ def has_numbers(inputString):
 
 
 crawler = Crawler()
-crawler.crawl('001888278', 'WP7FV7EC')
+crawler.crawl('001688440', 'GBLTTC6G')
 for flag in crawler.parser.flags:
     print(flag)
-

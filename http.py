@@ -1,10 +1,6 @@
-#!/usr/bin/env python3
-import binascii
 import socket
+import time
 
-import argparse
-import sys
-import ssl
 
 from request import *
 
@@ -13,13 +9,26 @@ from request import *
 class HTTP:
     def __init__(self, host='fring.ccs.neu.edu'):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.s.connect((host, 80))
+        self.host = host
+        self.connect(1)
+
 
     def send(self, request: HTTPRequest):
-        self.s.send(request.encode())
-        response = self.s.recv(4096).decode()
-        return response
+        try:
+            self.s.send(request.encode())
+            response = self.s.recv(4096).decode()
+            return response
+        except ConnectionResetError:
+            self.connect(1)
+            self.send(request)
 
 
-    def __del__(self):
-        self.s.close()
+    def connect(self, counter):
+        try:
+            self.s.connect((self.host, 80))
+        except TimeoutError:
+            print(counter)
+            time.sleep(counter)
+            counter+=1
+            self.connect(counter)
+

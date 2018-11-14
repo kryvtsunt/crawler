@@ -1,0 +1,23 @@
+#!/usr/bin/env python3
+
+import argparse
+import sys
+from crawler import Crawler
+
+def validate(args):
+    if len(args) != 3:  # no port or ssl, but hostname and NEU ID
+        raise SyntaxError('Correct syntax is \'[username] [password]\'')
+    else:
+        return True
+
+if __name__ == '__main__':
+    validate(sys.argv)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('name')
+    parser.add_argument('username')
+    parser.add_argument('password')
+    args = parser.parse_args(sys.argv)
+    crawler = Crawler()
+    crawler.crawl(args.username, args.password)
+    for flag in crawler.parser.flags:
+        print(flag)
