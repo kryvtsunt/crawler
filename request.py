@@ -1,5 +1,5 @@
+# Represents http request
 class HTTPRequest:
-
     # creates a HTTPRequest
     # all params are strings except for cookies
     # method is 'GET' or 'POST'
@@ -18,7 +18,7 @@ class HTTPRequest:
         self.cookies = cookies
         self.body = body
 
-    # this request as a String
+    # request as a String
     def __str__(self):
         request = (
             self.method+' '+ self.resource+' HTTP/' + self.version +'\r\n'
@@ -30,6 +30,6 @@ class HTTPRequest:
             )
         return request
 
-
+    # encode the request
     def encode(self):
         return str(self).encode()

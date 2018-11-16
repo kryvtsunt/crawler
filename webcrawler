@@ -4,6 +4,7 @@ import argparse
 import sys
 from crawler import Crawler
 
+# define if the arguments are valid
 def validate(args):
     if len(args) != 3:
         raise SyntaxError('Correct syntax is \'[username] [password]\'')
@@ -11,11 +12,11 @@ def validate(args):
         return True
 
 if __name__ == '__main__':
-    validate(sys.argv)
-    parser = argparse.ArgumentParser()
-    parser.add_argument('name')
-    parser.add_argument('username')
-    parser.add_argument('password')
-    args = parser.parse_args(sys.argv)
-    crawler = Crawler()
-    crawler.run(args.username, args.password)
+    if validate(sys.argv):
+        parser = argparse.ArgumentParser()
+        parser.add_argument('name')
+        parser.add_argument('username')
+        parser.add_argument('password')
+        args = parser.parse_args(sys.argv)
+        crawler = Crawler()
+        crawler.run(args.username, args.password)
