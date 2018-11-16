@@ -1,6 +1,6 @@
 ### PROJECT 4: Web Crawler
 
-Partners: Tymofii Kryvtsun, Carter Codell
+__Partners: Tymofii Kryvtsun, Carter Codell__
 
 We've created a web crawler to crawl the Fakebook website,
 and extract secret keys hidden in the random locations.
