@@ -15,4 +15,4 @@ Problems: The biggest problem we had was not getting any response form the serve
 (sometimes it stopped responding and did not react on our reconnection attempts).
 Therefore for HTTP/1.1 we create a new socket for each request. It slowed down the process a lot.
 
-Libraries: html.parser
+Libraries: html.parser, socket
