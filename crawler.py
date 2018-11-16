@@ -12,13 +12,16 @@ class Crawler:
 
     def login(self, username, password):
         self.send('/accounts/login/?next=/fakebook')
-        # assert self.retrieve_cookies(response) == True
         body = "username=" + username + "&password=" + password + "&csrfmiddlewaretoken=" + self.csrf + "&next=%2Ffakebook%2F"
         self.send('/accounts/login/?next=/fakebook', type='POST', body=body)
 
     def send(self, href, type='GET', body=''):
         get = HTTPRequest(type, href, cookies=self.cookies, body=body)
         while True:
+            # open new socket for every request
+            if get.version == '1.1':
+                self.http.s.close()
+                self.http = HTTP(self.host)
             resp = self.http.send(get)
             status = resp[9:12]
             connection = self.retrieve_connection(resp)
@@ -31,7 +34,9 @@ class Crawler:
             print(connection)
             print('\r\n')
             print('\r\n')
-            if connection == "close":
+            # open new socket only when server tells to do so
+            if (get.version == '1.0') and (connection == "close" or connection == None):
+                self.http.s.close()
                 self.http = HTTP(self.host)
             if status == "200":
                 self.retrieve_cookies(resp)
@@ -40,8 +45,7 @@ class Crawler:
             elif status == "302" or status == "301" or status == "300":
                 href = self.retrieve_location(resp)
                 self.retrieve_cookies(resp)
-                self.send(href)
-                break
+                return self.send(href)
             elif status == "500":
                 continue
             else:
@@ -84,7 +88,6 @@ class Crawler:
         return connection
 
     def crawl(self, username, password):
-        self.login(username, password)
         while len(self.parser.links) > 0:
             if (len(self.parser.flags) == 5):
                 break
@@ -98,6 +101,12 @@ class Crawler:
         if (len(self.parser.flags) != 5):
             self.parser.visited = []
             self.crawl(username,password)
+
+    def run(self, username, password):
+        crawler.login(username, password)
+        crawler.crawl(username, password)
+        for flag in crawler.parser.flags:
+            print(flag)
 
 
 
@@ -124,6 +133,5 @@ def has_numbers(inputString):
 
 
 crawler = Crawler()
-crawler.crawl('001688440', 'GBLTTC6G')
-for flag in crawler.parser.flags:
-    print(flag)
+crawler.run('001688440', 'GBLTTC6G')
+

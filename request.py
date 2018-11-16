@@ -9,7 +9,7 @@ class HTTPRequest:
     # connection specifies whether to keep the connection alive
     # cookies is a dict of any cookies to include in the request
     # body is the body message
-    def __init__(self, method, resource, host='fring.ccs.neu.edu', cookies='', body='', version='1.1'):
+    def __init__(self, method, resource, host='fring.ccs.neu.edu', cookies='', body='', version='1.0'):
         self.method = method.upper()
         self.resource = resource
         self.version = version
