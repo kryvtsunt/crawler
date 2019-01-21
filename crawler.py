@@ -33,18 +33,18 @@ class Crawler:
             connection = self.retrieve_connection(resp)
 
             # printing information about the request and the response
-            # print(str(get))
-            # print('\r\n')
-            # print(resp)
-            # print('\r\n')
-            # print("STATUS")
-            # print(status)
-            # print(connection)
-            # print('\r\n')
-            # print('\r\n')
+            print(str(get))
+            print('\r\n')
+            print(resp)
+            print('\r\n')
+            print("STATUS")
+            print(status)
+            print(connection)
+            print('\r\n')
+            print('\r\n')
 
             # open new socket only when server tells to do so (for HTTP/1.0)
-            if (get.version == '1.0') and (connection == "close" or connection == None):
+            if (get.version == '1.0') and (connection == "close" or connection is None):
                 self.http.s.close()
                 self.http = HTTP(self.host)
             # parse the page if the status code is 200 (OK)
@@ -111,19 +111,19 @@ class Crawler:
             if (len(self.parser.flags) == 5):
                 break
             # print the crawling status information
-            # print(self.parser.links)
-            # print(self.parser.flags)
-            # print(len(self.parser.links))
-            # print('\r\n')
-            # print('\r\n')
+            print(self.parser.links)
+            print(self.parser.flags)
+            print(len(self.parser.links))
+            print('\r\n')
+            print('\r\n')
             link = self.parser.links.pop()
             self.send(link)
 
     # run the crawler (log in and start crawling, print flags at the end)
     def run(self, username, password):
-        crawler.login(username, password)
-        crawler.crawl(username, password)
-        for flag in crawler.parser.flags:
+        self.login(username, password)
+        self.crawl(username, password)
+        for flag in self.parser.flags:
             print(flag)
 
 # An implementation of HTMLParser used for the Fakebook crawling
@@ -151,6 +151,6 @@ def has_numbers(inputString):
 
 
 crawler = Crawler()
-# crawler.run('001888278', 'WP7FV7EC')
-crawler.run('001688440', 'GBLTTC6G')
+crawler.run('001888278', 'WP7FV7EC')
+# crawler.run('001688440', 'GBLTTC6G')
 
